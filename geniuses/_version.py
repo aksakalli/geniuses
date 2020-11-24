@@ -1,0 +1,7 @@
+__title__ = "geniuses"
+__description__ = "Genius REST API Client"
+__url__ = "https://github.com/aksakalli/geniuses"
+__version__ = "0.0.1"
+__author__ = "Can Güney Aksakalli"
+__author_email__ = "cgaksakalli@gmail.com"
+__license__ = "Apache 2.0"
