@@ -15,14 +15,13 @@ class TestClient(unittest.TestCase):
     def setUpClass(cls):
         cls._client = geniuses.GeniusClient(TOKEN)
         replay_folder = os.path.join(os.path.dirname(__file__), "replay_data")
-        print(replay_folder)
         for file_name in os.listdir(replay_folder):
-            print(f"loading replay {file_name}")
             with open(os.path.join(replay_folder, file_name), "r+") as f:
                 url, method, status, data, *_ = f.read().split("\n")
                 status = int(status)
                 data = json.loads(data)
                 responses.add(method, url, json=data, status=status)
+                print(f"replay loaded: {url} {method}")
         responses.start()
 
     @classmethod
@@ -60,3 +59,31 @@ class TestClient(unittest.TestCase):
             songs[0].primary_artist.name, "King Gizzard & The Lizard Wizard"
         )
         self.assertEqual(songs[0].primary_artist.id, 482418)
+
+    def test_search_songs(self):
+        songs = list(self._client.search_songs("sagapo", per_page=17))
+        self.assertEqual(len(songs), 24)
+        self.assertEqual(songs[0].title, "Sagapò")
+        self.assertEqual(songs[0].title_with_featured, "Sagapò")
+        self.assertEqual(songs[0].lyrics_state, "complete")
+        self.assertEqual(
+            songs[0].song_art_image_thumbnail_url,
+            "https://images.genius.com/fe1f9dc6ce12688088f73c3bc842ee3a.300x305x1.jpg",
+        )
+        self.assertEqual(
+            songs[0].song_art_image_url,
+            "https://images.genius.com/fe1f9dc6ce12688088f73c3bc842ee3a.720x731x1.jpg",
+        )
+        self.assertEqual(
+            songs[0].header_image_thumbnail_url,
+            "https://images.genius.com/fe1f9dc6ce12688088f73c3bc842ee3a.300x305x1.jpg",
+        )
+        self.assertEqual(
+            songs[0].header_image_url,
+            "https://images.genius.com/fe1f9dc6ce12688088f73c3bc842ee3a.720x731x1.jpg",
+        )
+
+    def test_search_artists(self):
+        artists = self._client.search_artists("khruangbin")
+        for artist in artists:
+            print(artist)
