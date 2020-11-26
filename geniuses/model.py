@@ -16,10 +16,6 @@ class Artist(object):
         return self._header_image_url
 
     @property
-    def iq(self) -> int:
-        return self._iq
-
-    @property
     def is_verified(self) -> bool:
         return self._is_verified
 
@@ -36,7 +32,6 @@ class Artist(object):
         self._name = raw_dict["name"]
         self._image_url = raw_dict["image_url"]
         self._header_image_url = raw_dict["header_image_url"]
-        # self._iq = raw_dict["iq"]
         self._is_verified = raw_dict["is_verified"]
         self._is_meme_verified = raw_dict["is_meme_verified"]
         self._url = raw_dict["url"]
@@ -99,7 +94,7 @@ class Song(object):
         self._id = raw_dict["id"]
         self._title = raw_dict["title"]
         self._title_with_featured = raw_dict["title_with_featured"]
-        self._full_title = raw_dict["full_title"]
+        self._full_title = raw_dict["full_title"].replace("\xa0", " ")
         self._lyrics_state = raw_dict["lyrics_state"]
         self._song_art_image_thumbnail_url = raw_dict["song_art_image_thumbnail_url"]
         self._song_art_image_url = raw_dict["song_art_image_url"]
