@@ -52,6 +52,12 @@ class GeniusWebSession(Session):
 
     def request(self, method: str, path: str, *args: str, **kwargs: int) -> Response:
         """Make a HTTP request to API"""
+        headers = {
+            "application": "geniuses",
+            "User-Agent": "https://github.com/aksakalli/geniuses",
+        }
+        headers.update(kwargs.pop("headers", {}))
+        kwargs["headers"] = headers
         response = super().request(method, urljoin(self.host, path), *args, **kwargs)
         response.raise_for_status()
         return response
@@ -64,36 +70,36 @@ class GeniusClient:
         Args:
             access_token: a string containing the authentication token for the REST API.
         """
-        self._apiSession = GeniusApiSession(access_token)
-        self._webSession = GeniusWebSession()
+        self._api_session = GeniusApiSession(access_token)
+        self._web_session = GeniusWebSession()
 
     def search(self, query: str) -> List[Song]:
-        response = self._apiSession.request("get", "search", params={"q": query})
+        response = self._api_session.request("get", "search", params={"q": query})
         data = response.json()
         return [
-            Song(hit["result"])
+            Song(hit["result"], self._api_session, self._web_session)
             for hit in data["response"]["hits"]
             if hit["type"] == "song"
         ]
 
     def get_artist(self, id: int) -> Artist:
-        response = self._apiSession.request(
+        response = self._api_session.request(
             "get", f"artists/{id}", params={"text_format": "plain"}
         )
         data = response.json()
-        return Artist(data["response"]["artist"])
+        return Artist(data["response"]["artist"], self._api_session, self._web_session)
 
     def get_song(self, id: int) -> Song:
-        response = self._apiSession.request(
+        response = self._api_session.request(
             "get", f"songs/{id}", params={"text_format": "plain"}
         )
         data = response.json()["response"]["song"]
-        return Song(data)
+        return Song(data, self._api_session, self._web_session)
 
-    def search_songs(self, q: str, per_page=10) -> List[Song]:
+    def search_songs(self, q: str, per_page=10) -> Iterable[Song]:
         page = 1
         while page != None:
-            response = self._webSession.request(
+            response = self._web_session.request(
                 "GET",
                 "/api/search/song",
                 params={"page": page, "per_page": per_page, "q": q},
@@ -101,12 +107,12 @@ class GeniusClient:
             data = response.json()["response"]
             page = data["next_page"]
             for song_hits in data["sections"][0]["hits"]:
-                yield Song(song_hits["result"])
+                yield Song(song_hits["result"], self._api_session, self._web_session)
 
-    def search_artists(self, q: str, per_page=10) -> List[Artist]:
+    def search_artists(self, q: str, per_page=10) -> Iterable[Artist]:
         page = 1
         while page != None:
-            response = self._webSession.request(
+            response = self._web_session.request(
                 "GET",
                 "/api/search/artist",
                 params={"page": page, "per_page": per_page, "q": q},
@@ -114,4 +120,4 @@ class GeniusClient:
             data = response.json()["response"]
             page = data["next_page"]
             for song_hits in data["sections"][0]["hits"]:
-                yield Artist(song_hits["result"])
+                yield Artist(song_hits["result"], self._api_session, self._web_session)
