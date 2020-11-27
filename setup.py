@@ -34,7 +34,7 @@ setup(
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
     packages=["geniuses"],
-    install_requires=["requests"],
+    install_requires=["requests", "beautifulsoup4"],
     tests_require=["responses"],
     test_suite="tests",
 )

@@ -7,10 +7,20 @@ A Lightweight client for typed interaction with [Genius API](https://docs.genius
 
 ## Examples
 
-WIP
+```
+from geniuses import GeniusClient
+
+client = GeniusClient("<your_token>")
+songs = client.search("Cariñito los hijos")
+
+print(songs[0].primary_artist.name)  # Los hijos del sol
+print(songs[0].lyrics)  # Lloro por quererte ...
+
+songs_from_artist = list(songs[0].primary_artist.get_songs())
+print(songs_from_artist)  # [<Song(title=Cariñito, id=1949442)>, <Song(title=Si Me Quieres, id=2078361)>]
+```
 
 ## CLI
-
 
 WIP
 

@@ -5,7 +5,7 @@ import requests
 
 import responses
 
-import geniuses
+from geniuses import GeniusClient
 
 TOKEN = "<your_token>"
 
@@ -13,7 +13,8 @@ TOKEN = "<your_token>"
 class TestClient(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls._client = geniuses.GeniusClient(TOKEN)
+        cls._client = GeniusClient(TOKEN)
+
         replay_folder = os.path.join(os.path.dirname(__file__), "replay_data")
         for file_name in os.listdir(replay_folder):
             with open(os.path.join(replay_folder, file_name), "r+") as f:
@@ -22,6 +23,11 @@ class TestClient(unittest.TestCase):
                 data = json.loads(data)
                 responses.add(method, url, json=data, status=status)
                 print(f"replay loaded: {url} {method}")
+        replay_folder = os.path.join(os.path.dirname(__file__), "replay_pages")
+        for file_name in os.listdir(replay_folder):
+            with open(os.path.join(replay_folder, file_name), "r+") as f:
+                url = "https://genius.com/" + file_name
+                responses.add("GET", url, body=f.read(), status=status)
         responses.start()
 
     @classmethod
@@ -49,6 +55,9 @@ class TestClient(unittest.TestCase):
         )
         self.assertEqual(
             song.full_title, "Rattlesnake by King Gizzard & The Lizard Wizard"
+        )
+        self.assertEqual(
+            song.path, "/King-gizzard-and-the-lizard-wizard-rattlesnake-lyrics"
         )
 
     def test_search(self):
@@ -84,6 +93,22 @@ class TestClient(unittest.TestCase):
         )
 
     def test_search_artists(self):
-        artists = self._client.search_artists("khruangbin")
-        for artist in artists:
-            print(artist)
+        artists = list(self._client.search_artists("khruangbin"))
+        self.assertEqual(len(artists), 3)
+        self.assertEqual(artists[0].is_meme_verified, False)
+        self.assertEqual(
+            artists[0].header_image_url,
+            "https://images.genius.com/ed71b56e3cfb02c0065484270520e815.885x410x1.jpg",
+        )
+        self.assertEqual(artists[0].url, "https://genius.com/artists/Khruangbin")
+
+    def test_get_artist_songs(self):
+        artist = self._client.get_artist(672700)
+        songs = list(artist.get_songs(per_page=19))
+        self.assertEqual(len(songs), 59)
+        self.assertEqual(songs[11].title, "Cómo Te Quiero")
+
+    def test_get_song_lyrics(self):
+        song = self._client.get_song(2905339)
+        self.assertEqual(song.lyrics.lower().count("rattlesnake"), 51)
+        self.assertTrue(song.lyrics.startswith("[Hook]\nRattlesnake, rattlesnake"))
