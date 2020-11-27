@@ -2,8 +2,14 @@
 
 [![Travis (.org)](https://img.shields.io/travis/aksakalli/geniuses)](https://travis-ci.org/aksakalli/geniuses)
 [![Coverage Status](https://img.shields.io/codecov/c/github/aksakalli/geniuses/master.svg)](https://codecov.io/github/aksakalli/geniuses?branch=master)
+[![Python version](https://img.shields.io/badge/python-3.6+-blue.svg)](https://pypi.org/project/geniuses/)
+[![PyPI](https://img.shields.io/pypi/v/geniuses)](https://pypi.org/project/geniuses)
 
 A Lightweight client for typed interaction with [Genius API](https://docs.genius.com/).
+
+```
+pip install geniuses
+```
 
 ## Examples
 
