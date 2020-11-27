@@ -28,7 +28,13 @@ print(songs_from_artist)  # [<Song(title=Cariñito, id=1949442)>, <Song(title=Si
 
 ## CLI
 
-WIP
+A basic CLI allows you to select a song from an artist and show the lyrics.
+`GENIUS_API_TOKEN` env variable needs to be set before running the CLI.
+
+```
+export GENIUS_API_TOKEN="<my-token>"
+python -m geniuses
+```
 
 ## Development
 
