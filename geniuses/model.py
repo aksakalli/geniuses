@@ -18,6 +18,13 @@ class GeniusBase(object):
 
 
 class Artist(GeniusBase):
+    """
+    An artist is how Genius represents the creator of one or more songs
+    (or other documents hosted on Genius).
+
+    It's usually a musician or group of musicians.
+    """
+
     @property
     def id(self) -> int:
         return self._id
@@ -47,6 +54,12 @@ class Artist(GeniusBase):
         return self._url
 
     def get_songs(self, per_page=10, sort="title") -> "Iterable[Song]":
+        """Get songs hosted on Genius for this artist
+
+        :param per_page: Number of results to return per request
+        :param sort: title (default) or popularity
+        :returns: An Iterable of song results
+        """
         assert sort in ["title", "popularity"]
         page = 1
         while page != None:
@@ -76,6 +89,13 @@ class Artist(GeniusBase):
 
 
 class Song(GeniusBase):
+    """A song is a document hosted on Genius. It's usually music lyrics.
+
+    Data for a song includes details about the document itself and
+    information about all the referents that are attached to it,
+    including the text to which they refer.
+    """
+
     @property
     def id(self) -> int:
         return self._id
@@ -126,6 +146,9 @@ class Song(GeniusBase):
 
     @property
     def lyrics(self) -> str:
+        """Music lyrics that scrapped from genius.com page for the song.
+        Returns an empty string for not found lyrics or web crawler errors.
+        """
         if self._lyrics == None:
             response = self._web_session.request("GET", self.path)
             soup = BeautifulSoup(response.content, "html.parser")

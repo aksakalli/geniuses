@@ -2,9 +2,10 @@ import os
 from itertools import islice
 
 from .client import GeniusClient
+from .errors import UnauthorizedRequestError
 
-
-client = GeniusClient(os.environ.get("GENIUS_API_TOKEN"))
+ENV_VAR = "GENIUS_API_TOKEN"
+client = GeniusClient(os.environ.get(ENV_VAR))
 
 OPTIONS_WARNING_MSG = "Please enter a valid number for the given options"
 
@@ -28,30 +29,34 @@ print(f"Selected artist: {selected_artist.name}, here are the songs:")
 i = 1
 available_songs = []
 selected_song = None
-for song in selected_artist.get_songs(sort="popularity"):
-    available_songs.append(song)
-    print(f"{i}. {song.title}")
-    if i % 10 == 0:
-        while not selected_song and artist_input != "":
-            artist_input = input("Select a song (or hit enter for more options): ")
-            if artist_input == "":
+try:
+    for song in selected_artist.get_songs(sort="popularity"):
+        available_songs.append(song)
+        print(f"{i}. {song.title}")
+        if i % 10 == 0:
+            while not selected_song and artist_input != "":
+                artist_input = input("Select a song (or hit enter for more options): ")
+                if artist_input == "":
+                    break
+                try:
+                    selected_song = available_songs[int(artist_input) - 1]
+                except (ValueError, IndexError):
+                    print(OPTIONS_WARNING_MSG)
+            if selected_song:
                 break
+            else:
+                artist_input = None
+        i += 1
+    else:
+        while selected_song:
+            artist_input = input("These are all the songs, select one: ")
             try:
                 selected_song = available_songs[int(artist_input) - 1]
             except (ValueError, IndexError):
                 print(OPTIONS_WARNING_MSG)
-        if selected_song:
-            break
-        else:
-            artist_input = None
-    i += 1
-else:
-    while selected_song:
-        artist_input = input("These are all the songs, select one: ")
-        try:
-            selected_song = available_songs[int(artist_input) - 1]
-        except (ValueError, IndexError):
-            print(OPTIONS_WARNING_MSG)
+except UnauthorizedRequestError:
+    print(f"ERROR: please set a valid token for {ENV_VAR} environment variable")
+    exit()
 
 print("here is the song Lyrics:\n\n")
 print("-----------")
